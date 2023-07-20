@@ -6,50 +6,27 @@ import java.util.UUID;
 public class AccountTransactions {
 
     private UUID id;
-    private String accountNumber;
+    private String fromAccountNumber;
+    private String toAccountNumber;
     private BigDecimal amount;
     private String status;
 
     public AccountTransactions() {
     }
-    public AccountTransactions(String accountNumber, BigDecimal amount) {
-        this.accountNumber = accountNumber;
-        this.amount = amount;
-    }
 
-    public AccountTransactions(UUID id, String accountNumber, BigDecimal amount, String status) {
+    public AccountTransactions(UUID id, String fromAccountNumber, String toAccountNumber, BigDecimal amount, String status) {
         this.id = id;
-        this.accountNumber = accountNumber;
+        this.fromAccountNumber = fromAccountNumber;
+        this.toAccountNumber = toAccountNumber;
         this.amount = amount;
         this.status = status;
     }
 
-    public AccountTransactions(String accountNumber, BigDecimal amount, String status) {
-        this.accountNumber = accountNumber;
+    public AccountTransactions(String fromAccountNumber, String toAccountNumber, BigDecimal amount, String status) {
+        this.fromAccountNumber = fromAccountNumber;
+        this.toAccountNumber = toAccountNumber;
         this.amount = amount;
         this.status = status;
-    }
-
-    public AccountTransactions(UUID id, String accountNumber, BigDecimal amount) {
-        this.id = id;
-        this.accountNumber = accountNumber;
-        this.amount = amount;
-    }
-
-    public String getAccountNumber() {
-        return accountNumber;
-    }
-
-    public void setAccountNumber(String accountNumber) {
-        this.accountNumber = accountNumber;
-    }
-
-    public BigDecimal getAmount() {
-        return amount;
-    }
-
-    public void setAmount(BigDecimal amount) {
-        this.amount = amount;
     }
 
     public UUID getId() {
@@ -60,6 +37,30 @@ public class AccountTransactions {
         this.id = id;
     }
 
+    public String getFromAccountNumber() {
+        return fromAccountNumber;
+    }
+
+    public void setFromAccountNumber(String fromAccountNumber) {
+        this.fromAccountNumber = fromAccountNumber;
+    }
+
+    public String getToAccountNumber() {
+        return toAccountNumber;
+    }
+
+    public void setToAccountNumber(String toAccountNumber) {
+        this.toAccountNumber = toAccountNumber;
+    }
+
+    public BigDecimal getAmount() {
+        return amount;
+    }
+
+    public void setAmount(BigDecimal amount) {
+        this.amount = amount;
+    }
+
     public String getStatus() {
         return status;
     }
@@ -68,3 +69,4 @@ public class AccountTransactions {
         this.status = status;
     }
 }
+

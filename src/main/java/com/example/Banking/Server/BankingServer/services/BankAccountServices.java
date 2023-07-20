@@ -1,6 +1,7 @@
 package com.example.Banking.Server.BankingServer.services;
 
 import com.example.Banking.Server.BankingServer.Mapper.BankAccountRowMapper;
+import com.example.Banking.Server.BankingServer.models.AccountTransactions;
 import com.example.Banking.Server.BankingServer.models.BankAccount;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -35,10 +36,12 @@ public class BankAccountServices {
 
         jdbcTemplate.execute("CREATE TABLE IF NOT EXISTS TRANSACTIONS(" +
                 "id UUID DEFAULT uuid_generate_v4() PRIMARY KEY," +
-                "accountNumber VARCHAR(255)," +
+                "fromAccountNumber VARCHAR(255)," +
+                "toAccountNumber VARCHAR(255)," +
                 "amount DECIMAL," +
                 "status VARCHAR(255)," +
-                "FOREIGN KEY (accountNumber) REFERENCES BANK (accountNumber)" +
+                "FOREIGN KEY (fromAccountNumber) REFERENCES BANK (accountNumber)," +
+                "FOREIGN KEY (toAccountNumber) REFERENCES BANK (accountNumber)" +
                 ");");
     }
 
@@ -71,9 +74,9 @@ public class BankAccountServices {
         return bankAccount;
     }
 
-    public Void insertTransaction(String accountNumber, BigDecimal amount, String status){
-        String sql = "INSERT INTO TRANSACTIONS (accountNumber, amount, status) VALUES (?, ?, ?)";
-        jdbcTemplate.update(sql, accountNumber, amount, status);
+    public Void insertTransaction(AccountTransactions accountTransactions){
+        String sql = "INSERT INTO TRANSACTIONS (fromAccountNumber,toAccountNumber, amount, status) VALUES (?, ?, ?, ?)";
+        jdbcTemplate.update(sql, accountTransactions.getFromAccountNumber(), accountTransactions.getToAccountNumber(), accountTransactions.getAmount(), accountTransactions.getStatus());
         return null;
     }
 
@@ -103,8 +106,7 @@ public class BankAccountServices {
     }
 
     public Object getTransactions(String accountNumber) {
-        String sql = "select bank.accountNumber,transactions.amount,transactions.status from bank join transactions on\n" +
-                "bank.accountNumber = transactions.accountNumber;";
+        String sql = "select transactions.fromAccountNumber,transactions.toAccountNumber,transactions.amount,transactions.status from bank INNER JOIN transactions on bank.accountNumber = transactions.fromAccountNumber;";
         return jdbcTemplate.queryForList(sql);
     }
 }

@@ -1,6 +1,7 @@
 package com.example.Banking.Server.BankingServer.Controller;
 
 import com.example.Banking.Server.BankingServer.Producer.BankAccountProducer;
+import com.example.Banking.Server.BankingServer.models.AccountTransactions;
 import com.example.Banking.Server.BankingServer.models.BankAccount;
 import com.example.Banking.Server.BankingServer.services.BankAccountServices;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,25 +30,21 @@ public class BankAccountController {
         return new ResponseEntity<String>("Created Bank Account with account No.: " + bankAccount.getAccountNumber(),
         HttpStatus.CREATED);
     }
-
-    @RequestMapping(value = "/_debit/{accountNumber}",method = RequestMethod.PATCH)
-    public ResponseEntity<String> debitAmount(@PathVariable String accountNumber, @RequestBody BigDecimal debitAmount){
-        if(bankAccountServices.findByAccountNumber(accountNumber) == null){
-            return new ResponseEntity<>("Bank Account with accountNumber: " + accountNumber + " does not exist",HttpStatus.NOT_FOUND);
+    @RequestMapping(value = "/_transfer",method = RequestMethod.PATCH)
+    public ResponseEntity<String> transferAmountFromOneBankAccountToAnother(@RequestBody AccountTransactions accountTransactions){
+        if(bankAccountServices.findByAccountNumber(accountTransactions.getFromAccountNumber()) == null){
+            return new ResponseEntity<>("Bank Account with accountNumber: " + accountTransactions.getFromAccountNumber() + " does not exist",HttpStatus.NOT_FOUND);
         }
-        bankAccountProducer.debitAmountByKafka(accountNumber,debitAmount,"Debit");
-        return new ResponseEntity<>("Successfully debited the amount from bank account with accountNumber: " + accountNumber,HttpStatus.ACCEPTED);
-    }
-
-    @RequestMapping(value = "/_credit/{accountNumber}",method = RequestMethod.PATCH)
-    public ResponseEntity<String> creditAmount(@PathVariable String accountNumber, @RequestBody BigDecimal creditAmount){
-        if(bankAccountServices.findByAccountNumber(accountNumber) == null){
-            return new ResponseEntity<>("Bank Account with accountNumber: " + accountNumber + " does not exist",HttpStatus.NOT_FOUND);
+        if(bankAccountServices.findByAccountNumber(accountTransactions.getToAccountNumber()) == null){
+            return new ResponseEntity<>("Bank Account with accountNumber: " + accountTransactions.getToAccountNumber() + " does not exist",HttpStatus.NOT_FOUND);
         }
-        bankAccountProducer.creditAmountByKafka(accountNumber,creditAmount,"Credit");
-        return new ResponseEntity<>("Successfully credited the amount from bank account with accountNumber: " + accountNumber,HttpStatus.ACCEPTED);
+        BankAccount bankAccount = bankAccountServices.findByAccountNumber(accountTransactions.getFromAccountNumber());
+        if(bankAccount.getBalance().compareTo(accountTransactions.getAmount()) < 0){
+            return new ResponseEntity<>("Insufficient Balance", HttpStatus.NOT_ACCEPTABLE);
+        }
+        bankAccountProducer.debitAmountByKafka(accountTransactions);
+        return new ResponseEntity<>("Transferred",HttpStatus.ACCEPTED);
     }
-
     @RequestMapping(value = "/_transactions/{accountNumber}",method = RequestMethod.GET)
     public ResponseEntity<Object> getTransactions(@PathVariable String accountNumber){
         return new ResponseEntity<Object>(bankAccountServices.getTransactions(accountNumber),HttpStatus.OK);

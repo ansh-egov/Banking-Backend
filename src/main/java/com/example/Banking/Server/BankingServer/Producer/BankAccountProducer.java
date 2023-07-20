@@ -12,23 +12,15 @@ import java.math.BigDecimal;
 public class BankAccountProducer {
     private final KafkaTemplate<String, AccountTransactions> kafkaTemplate;
 
-    @Value("${kafka.topic.bank-account-debit}")
-    private String bankAccountDebitTopic;
-
-    @Value("${kafka.topic.bank-account-credit}")
-    private String bankAccountCreditTopic;
-
+    @Value("${kafka.topic.bank-account-transfer}")
+    private String bankAccountTransferTopic;
 
     @Autowired
     public BankAccountProducer(KafkaTemplate<String,AccountTransactions> kafkaTemplate){
         this.kafkaTemplate = kafkaTemplate;
     }
 
-    public void debitAmountByKafka(String accountNumber, BigDecimal debitAmount,String status){
-        kafkaTemplate.send(bankAccountDebitTopic,new AccountTransactions(accountNumber,debitAmount,status));
-    }
-
-    public void creditAmountByKafka(String accountNumber,BigDecimal creditAmount,String status){
-        kafkaTemplate.send(bankAccountCreditTopic,new AccountTransactions(accountNumber,creditAmount,status));
+    public void debitAmountByKafka(AccountTransactions accountTransactions){
+        kafkaTemplate.send(bankAccountTransferTopic,accountTransactions);
     }
 }
